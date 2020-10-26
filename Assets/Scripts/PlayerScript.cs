@@ -13,11 +13,32 @@ public class PlayerScript : MonoBehaviour
 
     private int scoreValue = 0;
 
+    public Text winText;
+
+    public Text livesText;
+
+    private int livesValue = 3;
+
+    public Text loseText;
+
+    Animator anim;
+
+    private bool facingRight = true;
+
+
+
     // Start is called before the first frame update
     void Start()
     {
         rd2d = GetComponent<Rigidbody2D>();
         score.text = scoreValue.ToString();
+        winText.text = "";
+        livesText.text = livesValue.ToString();
+        loseText.text = "";
+
+        anim = GetComponent<Animator>();
+
+
     }
 
     // Update is called once per frame
@@ -31,6 +52,35 @@ public class PlayerScript : MonoBehaviour
         {
             Application.Quit();
         }
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            anim.SetInteger("State", 1);
+        }
+
+        if (Input.GetKeyUp(KeyCode.LeftArrow))
+        {
+            anim.SetInteger("State", 0);
+        }
+
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            anim.SetInteger("State", 1);
+        }
+
+        if (Input.GetKeyUp(KeyCode.RightArrow))
+        {
+            anim.SetInteger("State", 0);
+        }
+
+        if (facingRight == false && hozMovement > 0)
+        {
+            Flip();
+        }
+        else if (facingRight == true && hozMovement < 0)
+        {
+            Flip();
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -42,7 +92,36 @@ public class PlayerScript : MonoBehaviour
             Destroy(collision.collider.gameObject);
         }
 
+        if (collision.collider.tag == "Enemy")
+        {
+            livesValue -= 1;
+            livesText.text = livesValue.ToString();
+            Destroy(collision.collider.gameObject);
+        }
+
+       if (collision.collider.tag == "Player")
+        {
+            Destroy(collision.collider.gameObject);
+        }
+
+        if (livesValue == 0)
+        {
+            loseText.text = "You lose! Game Over!";
+            
+        }
+
+        if (scoreValue == 8)
+        {
+            winText.text = "You win! Game created by Asia Owens!";
+        }
+
+        if (scoreValue == 4)
+        {
+            transform.position = new Vector3(50.0f, 0.0f, 50.0f);
+        }
     }
+
+
 
     private void OnCollisionStay2D(Collision2D collision)
     {
@@ -55,5 +134,11 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-
+    void Flip()
+    {
+        facingRight = !facingRight;
+        Vector2 Scaler = transform.localScale;
+        Scaler.x = Scaler.x * -1;
+        transform.localScale = Scaler;
+    }
 }
